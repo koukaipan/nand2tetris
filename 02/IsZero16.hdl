@@ -1,0 +1,14 @@
+/**
+ * A chip IsZero16 outputs 1 if in is zero, and 0 otherwise
+ */
+
+CHIP IsZero16 {
+    IN in[16];
+    OUT out;
+
+    PARTS:
+    Or8Way(in=in[0..7], out=lsb);
+    Or8Way(in=in[8..15], out=msb);
+    Or(a=lsb, b=msb, out=z);
+    Not(in=z, out=out);
+}
