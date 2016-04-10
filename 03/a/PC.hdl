@@ -16,5 +16,26 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+	/* readLoad = reset | load | inc */
+	Or(a=reset, b=load, out=or2);
+	Or(a=or2, b=inc, out=realLoad);
+
+	/* realIn = reset&false + in&load&(!reset) + incIn&inc&(!load&!reset) */
+	/* case1: reset&false = 0 */
+	/* case2: case2Sel = in&(!reset) */
+	Not(in=reset, out=notRst);
+	And(a=load, b=notRst, out=case2Sel);
+	Mux16(a=false, b=in, sel=case2Sel, out=x2);
+	/* case3: case3Sel = inc&!(load|reset) */
+	Or(a=load, b=reset, out=t1);
+	Not(in=t1, out=t2);
+	And(a=inc, b=t2, out=case3Sel);
+	Inc16(in=tmpOut, out=incIn);
+	Mux16(a=false, b=incIn, sel=case3Sel, out=x3);
+
+	/* realIn = x1(0) + x2 + x3 */
+	Or16(a=x2, b=x3, out=realIn);
+
+	Register(in=realIn, load=realLoad, out=tmpOut);
+	Or16(a=false, b=tmpOut, out=out);
 }
